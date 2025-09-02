@@ -1,0 +1,24 @@
+# 🌱 環境ファイル
+.env
+.env.*
+
+# 🧠 Pythonゴミファイル
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# 💾 DB
+*.sqlite3
+*.db
+
+# 🧪 セキュリティ系
+venv/
+.venv/
+
+# 🧹 エディタの一時ファイル
+*.log
+*.swp
+*.bak
+.DS_Store
+Thumbs.db

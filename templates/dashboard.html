@@ -1,0 +1,37 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>linebot管理画面</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="alert alert-info mt-2">
+        {% for msg in messages %}
+        <div>{{ msg }}</div> 
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <h1 class="text-primary">お天気bot　管理システム</h1><br>
+    <div>
+        <form method="POST" action="/push_test">
+        <label for="message" class="text-primary form-label"> テスト送信(管理者lineルームへ)</label><br>
+        <input type="message" class="text-primary mt-1" id="message" name="message" placeholder="送信したいメッセージを入力">
+        <button type="submit" class="btn btn-primary">送信</button> 
+        </form>   
+    </div>
+    <div>
+        <form method="POST" action="/broadcast">
+        <label for="message2" class="text-primary form-label"> 登録者一斉送信</label><br>
+        <input type="message" class="text-primary mt-1" id="message2" name="message" placeholder="送信したいメッセージを入力">
+        <button type="submit" class="btn btn-primary">送信</button>   
+        </form> 
+    </div>    
+    
+</body>
+</html>

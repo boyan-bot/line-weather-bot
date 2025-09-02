@@ -1,0 +1,13 @@
+<h2>登録済みユーザー一覧</h2>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>userId</th>
+            <th>登録日時</th>
+        </tr>
+        {% for user_id, created_at in users %}
+        <tr>
+            <td>{{ user_id }}</td>
+            <td>{{ created_at }}</td>
+        </tr>
+        {% endfor %}
+    </table>
