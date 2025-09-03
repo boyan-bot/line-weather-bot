@@ -21,6 +21,13 @@ app = Flask(__name__)
 app.secret_key = 'boyan'
 init_db()
 
+scheduler = BackgroundScheduler()
+@app.before_first_request
+def start_scheduler():
+    scheduler.add_job(job_func, 'cron', hour=3, minute=7)
+    scheduler.start()
+    print("スケジューラースタート👻")
+
 
 #ルーティング==========================================
 
@@ -211,12 +218,6 @@ def job_func():
     else:
          print('一斉送信に失敗しました')
     
-
-    
-scheduler = BackgroundScheduler()
-scheduler.add_job(job_func,'cron',hour=2,minute=25)
-scheduler.start()
-
 
 
 
