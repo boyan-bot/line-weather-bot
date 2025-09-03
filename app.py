@@ -196,7 +196,7 @@ def job_func():
          "Authorization":f"Bearer {CHANNEL_ACCESS_TOKEN}"
     }
     data = {
-        "to": user_id,
+        "to": [user_id],
         "messages": [
             {
                 "type": "text",
