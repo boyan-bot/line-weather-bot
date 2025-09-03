@@ -223,7 +223,7 @@ scheduler = BackgroundScheduler()
 def start_scheduler():
 # スケジューラーのスタート関数
     if not scheduler.running:
-        scheduler.add_job(job_func,'interval', minutes=2)
+        scheduler.add_job(job_func,'cron', hour=4,minute=35)
         scheduler.start()
         print("スケジューラースタート👻")
 
