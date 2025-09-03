@@ -6,7 +6,7 @@ from user_utils import add_user,init_db
 import sqlite3
 import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
-
+import json
 
 
 #グローバル変数の設定
@@ -214,9 +214,10 @@ def job_func():
 
     
 scheduler = BackgroundScheduler()
-scheduler.add_job(job_func,'cron',hour=8,minute=30)
+scheduler.add_job(job_func,'cron',hour=11,minute=2)
 scheduler.start()
-     
+
+
 
 
 if __name__ == '__main__':
