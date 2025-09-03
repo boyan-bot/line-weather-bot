@@ -183,18 +183,20 @@ def get_weather():
 def job_func():
 # APSchedulerへ渡すfunc
     user_ids = get_all_users_ids()
+    user_id = USER_ID    
     today_forcast = get_weather()
+
     print(f'today_forcast:\n{today_forcast}')
 
-    if not user_ids:
-         print('送信対象がいません:400')
-         return     
+    # if not user_ids:
+    #      print('送信対象がいません:400')
+    #      return     
     headers = {
          "Content-Type":"application/json",
          "Authorization":f"Bearer {CHANNEL_ACCESS_TOKEN}"
     }
     data = {
-        "to": user_ids,
+        "to": user_id,
         "messages": [
             {
                 "type": "text",
