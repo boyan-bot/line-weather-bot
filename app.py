@@ -162,7 +162,10 @@ def get_weather():
                         f"?q={city},jp&appid={WEATHER_API_KEY}&lang=ja&units=metric" )
     try:
         response = requests.get(forecast_url)
-        data = response.json() 
+        data = response.json()
+        if not data:
+             print(f'天気予報APIの入手に失敗😿')
+             return
         print(f"天気予報の生データ：\n{data}") # 今日の日付（例: "2025-08-26"） 
         today_str = datetime.datetime.now().strftime("%Y-%m-%d")
         # 今日のデータだけ抽出 
@@ -218,7 +221,7 @@ scheduler = BackgroundScheduler()
 def start_scheduler():
 # スケジューラーのスタート関数
     if not scheduler.running:
-        scheduler.add_job(job_func, 'cron', hour=3, minute=46)
+        scheduler.add_job(job_func,'interval', minutes=2)
         scheduler.start()
         print("スケジューラースタート👻")
 
