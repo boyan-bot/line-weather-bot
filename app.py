@@ -22,16 +22,6 @@ app.secret_key = 'boyan'
 init_db()
 
 
-scheduler = BackgroundScheduler()
-def start_scheduler():
-    if not scheduler.running:
-        scheduler.add_job(job_func, 'cron', hour=3, minute=30)
-        scheduler.start()
-        print("スケジューラースタート👻")
-
-start_scheduler()
-
-
 
 #ルーティング==========================================
 
@@ -221,7 +211,18 @@ def job_func():
          print('一斉送信が成功しました(200)')  
     else:
          print('一斉送信に失敗しました')
-    
+
+
+
+scheduler = BackgroundScheduler()
+def start_scheduler():
+# スケジューラーのスタート関数
+    if not scheduler.running:
+        scheduler.add_job(job_func, 'cron', hour=3, minute=46)
+        scheduler.start()
+        print("スケジューラースタート👻")
+
+start_scheduler()
 
 
 
