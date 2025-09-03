@@ -135,7 +135,7 @@ def get_all_users_ids():
 # userIdだけのリストを返す
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
-    cur.execute("SELECT user_ID FROM users")
+    cur.execute("SELECT user_id FROM users")
     rows = cur.fetchall()
     conn.close()
     return [row[0] for row in rows]
