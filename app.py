@@ -214,7 +214,7 @@ def job_func():
 
     
 scheduler = BackgroundScheduler()
-scheduler.add_job(job_func,'cron',hour=11,minute=10)
+scheduler.add_job(job_func,'cron',hour=2,minute=25)
 scheduler.start()
 
 
