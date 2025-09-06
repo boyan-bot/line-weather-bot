@@ -260,6 +260,7 @@ def job_weather():
             subset = f"{status_msg}"
 
         text_data = subset
+        print("⚡ 雷アラート送信:", subset)
         post_func(text_data)
 
     
@@ -267,6 +268,7 @@ def job_weather():
     else:
         now_date = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
         print(f"☀️ 渋谷区に雷注意報はありません。{now_date}")
+        print("⚡ 雷アラート送信:", subset)
         post_func("☀️ 渋谷区に雷注意報はありません。") #チェックで一時的に
 
 
@@ -277,8 +279,8 @@ def start_scheduler():
     if not scheduler.running:
         print("🚀 Schedulerを開始します")
         # 天気予報
-        scheduler.add_job(job_func,'cron', hour=20,minute=30,id="weather_evning", replace_existing=True)
-        scheduler.add_job(job_func,'cron', hour=8,minute=30,id="weather_morning", replace_existing=True)
+        scheduler.add_job(job_func,'cron', hour=20,minute=30,timezone=timezone("Asia/Tokyo"),id="weather_evning", replace_existing=True)
+        scheduler.add_job(job_func,'cron', hour=8,minute=30,timezone=timezone("Asia/Tokyo"),id="weather_morning", replace_existing=True)
         print("スケジューラースタート👻")
         # 雷通知
         scheduler.add_job(job_weather,'cron',hour="8-23",minute=25,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
