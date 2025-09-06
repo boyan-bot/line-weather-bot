@@ -197,6 +197,8 @@ def job_weather():
     SHIBUYA = "1311300"  # 渋谷区コード
     WARNING_CODES = {
     "14": "雷注意報",
+    "10": "大雨注意報",
+    "15": "強風注意報"
     # 他の注意報コードを追加してもOK
     }
 
@@ -207,19 +209,23 @@ def job_weather():
 
         status_msg = None
         detail_msgs = []
+
     except Exception as e:
         print(f'気象庁のAPI取得に失敗しました：\n{e}')
         return
 
     # --- 1. status（発表／継続／解除）は areaTypes から ---
+    status_msgs = []
     for at in data.get("areaTypes", []):
         for area in at.get("areas", []):
             if area.get("code") == SHIBUYA:
                 for w in area.get("warnings", []):
-                    if w.get("code") == "14":  # 雷
-                        name = WARNING_CODES.get("14", "雷")
+                    num = int(w.get("code"))
+                    if num in (10,14,15):  # 雷
+                        name = WARNING_CODES.get(num, "気候に注意")
                         status = w.get("status", "不明")
-                        status_msg = f"{name}：{status}"
+                        status_msgs.append(f"{name}：{status}")
+                        
 
     # --- 2. 危険度や追加情報は timeSeries から ---
     for ts in data.get("timeSeries", []):
@@ -227,7 +233,8 @@ def job_weather():
             for area in at.get("areas", []):
                 if area.get("code") == SHIBUYA:
                     for w in area.get("warnings", []):
-                        if w.get("code") == "14":
+                        num2 = int(w.get("code"))
+                        if num2 in (10,14,15):
                             # 危険度レベル
                             if "levels" in w:
                                 for lvl in w["levels"]:
@@ -250,6 +257,7 @@ def job_weather():
 
     # --- 3. 出力 ---
     if status_msg:
+        status_msg = "\n".join(status_msgs)
         print("⚡【渋谷区 雷アラート】")
         print(status_msg)
         if detail_msgs:
@@ -283,7 +291,7 @@ def start_scheduler():
         scheduler.add_job(job_func,'cron', hour=8,minute=30,timezone=timezone("Asia/Tokyo"),id="weather_morning", replace_existing=True)
         print("スケジューラースタート👻")
         # 雷通知
-        scheduler.add_job(job_weather,'cron',hour="8-23",minute=25,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
+        scheduler.add_job(job_weather,'cron',hour="8-23",minute=5,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
         
         scheduler.start()
         print("✅ Schedulerがスタートしました")
