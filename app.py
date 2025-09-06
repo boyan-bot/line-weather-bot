@@ -5,8 +5,9 @@ from flask import request,Flask,render_template,redirect,url_for,flash
 from user_utils import add_user,init_db
 import sqlite3
 import datetime
+import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
-import json
+from post_linebot import post_func
 
 
 #グローバル変数の設定
@@ -182,40 +183,90 @@ def get_weather():
 
 def job_func():
 # APSchedulerへ渡すfunc
-    user_ids = get_all_users_ids()
-    user_id = USER_ID    
     today_forcast = get_weather()
 
     print(f'today_forcast:\n{today_forcast}')
 
-    # if not user_ids:
-    #      print('送信対象がいません:400')
-    #      return     
-    headers = {
-         "Content-Type":"application/json",
-         "Authorization":f"Bearer {CHANNEL_ACCESS_TOKEN}"
-    }
-    data = {
-        "to": [user_id],
-        "messages": [
-            {
-                "type": "text",
-                "text": today_forcast
-            }
-        ]
+    text_data = today_forcast
+    post_func(text_data)
+
+
+def job_weather():
+    URL = "https://www.jma.go.jp/bosai/warning/data/warning/130000.json"
+    SHIBUYA = "1311300"  # 渋谷区コード
+    WARNING_CODES = {
+    "14": "雷注意報",
+    # 他の注意報コードを追加してもOK
     }
 
-    response = requests.post(
-        "https://api.line.me/v2/bot/message/multicast",
-        headers=headers,
-        json=data
-    )
-    print(f'レスポンス：{response.status_code},{response.text}')
+    try:
+        res = requests.get(URL, timeout=10)
+        res.raise_for_status()
+        data = res.json()
 
-    if response.status_code == 200:
-         print('一斉送信が成功しました(200)')  
+        status_msg = None
+        detail_msgs = []
+    except Exception as e:
+        print(f'気象庁のAPI取得に失敗しました：\n{e}')
+        return
+
+    # --- 1. status（発表／継続／解除）は areaTypes から ---
+    for at in data.get("areaTypes", []):
+        for area in at.get("areas", []):
+            if area.get("code") == SHIBUYA:
+                for w in area.get("warnings", []):
+                    if w.get("code") == "14":  # 雷
+                        name = WARNING_CODES.get("14", "雷")
+                        status = w.get("status", "不明")
+                        status_msg = f"{name}：{status}"
+
+    # --- 2. 危険度や追加情報は timeSeries から ---
+    for ts in data.get("timeSeries", []):
+        for at in ts.get("areaTypes", []):
+            for area in at.get("areas", []):
+                if area.get("code") == SHIBUYA:
+                    for w in area.get("warnings", []):
+                        if w.get("code") == "14":
+                            # 危険度レベル
+                            if "levels" in w:
+                                for lvl in w["levels"]:
+                                    if lvl.get("type") == "雷危険度":
+                                        for la in lvl.get("localAreas", []):
+                                            values = la.get("values", [])
+                                            adds = la.get("additions", [])
+                                            if values:
+                                                detail_msgs.append(f"危険度: {','.join(values)}")
+                                            if adds:
+                                                detail_msgs.append(f"追加: {','.join(adds)}")
+                            # 継続レベル
+                            if "continueLevels" in w:
+                                for cl in w["continueLevels"]:
+                                    if cl.get("type") == "雷危険度":
+                                        for la in cl.get("localAreas", []):
+                                            val = la.get("value")
+                                            if val:
+                                                detail_msgs.append(f"継続危険度: {val}")
+
+    # --- 3. 出力 ---
+    if status_msg:
+        print("⚡【渋谷区 雷アラート】")
+        print(status_msg)
+        if detail_msgs:
+            for m in detail_msgs:
+                print("  -", m)
+            subset = f"{status_msg}\n" + "\n".join(f'- {m}' for m in detail_msgs)
+        else:
+            subset = f"{status_msg}"
+
+        text_data = subset
+        post_func(text_data)
+
+    
+
     else:
-         print('一斉送信に失敗しました')
+        now_date = datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
+        print(f"☀️ 渋谷区に雷注意報はありません。{now_date}")
+        post_func("☀️ 渋谷区に雷注意報はありません。") #チェックで一時的に
 
 
 
@@ -223,9 +274,14 @@ scheduler = BackgroundScheduler()
 def start_scheduler():
 # スケジューラーのスタート関数
     if not scheduler.running:
-        scheduler.add_job(job_func,'cron', hour=20,minute=30)
-        scheduler.start()
+        # 天気予報
+        scheduler.add_job(job_func,'cron', hour=20,minute=30,id="weather_evning", replace_existing=True)
+        scheduler.add_job(job_func,'cron', hour=8,minute=30,id="weather_morning", replace_existing=True)
         print("スケジューラースタート👻")
+        # 雷通知
+        scheduler.add_job(job_weather,'cron',hour="8-23",minute=0,id="thunder_alert", replace_existing=True)
+        
+        scheduler.start()
 
 start_scheduler()
 
