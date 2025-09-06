@@ -8,6 +8,7 @@ import datetime
 import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
 from post_linebot import post_func
+from pytz import timezone
 
 
 #グローバル変数の設定
@@ -280,7 +281,7 @@ def start_scheduler():
         scheduler.add_job(job_func,'cron', hour=8,minute=30,id="weather_morning", replace_existing=True)
         print("スケジューラースタート👻")
         # 雷通知
-        scheduler.add_job(job_weather,'cron',hour="8-23",minute=0,id="thunder_alert", replace_existing=True)
+        scheduler.add_job(job_weather,'cron',hour="8-23",minute=25,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
         
         scheduler.start()
         print("✅ Schedulerがスタートしました")
