@@ -236,8 +236,6 @@ def job_weather():
 scheduler = BackgroundScheduler()
 def start_scheduler():
 # スケジューラーのスタート関数
-    for job in scheduler.get_jobs():
-        print("登録ジョブ:", job)
     if not scheduler.running:
         print("🚀 Schedulerを開始します")
         # 天気予報
@@ -249,6 +247,8 @@ def start_scheduler():
         
         scheduler.start()
         print("✅ Schedulerがスタートしました")
+        for job in scheduler.get_jobs():
+            print("登録ジョブ:", job)
 
 start_scheduler()
 
