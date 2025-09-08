@@ -230,12 +230,14 @@ def job_weather():
     else:
         msg = "☀️ 渋谷区に気象注意報はありません。"
         print(msg)
-    
+        post_func(msg)
 
 
 scheduler = BackgroundScheduler()
 def start_scheduler():
 # スケジューラーのスタート関数
+    for job in scheduler.get_jobs():
+        print("登録ジョブ:", job)
     if not scheduler.running:
         print("🚀 Schedulerを開始します")
         # 天気予報
