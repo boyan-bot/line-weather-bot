@@ -256,7 +256,7 @@ def fetch_typhoon_alert():
 
     root = ET.fromstring(res.text)
     for entry in root.findall('atom:entry',NS):
-        title = entry.find('atom:title,NS').text
+        title = entry.find('atom:title',NS).text
         link = entry.find('atom:link',NS).attrib['href']
 
         if re.search(r"台風第\d+号に関する情報 第1号", title):
@@ -278,10 +278,10 @@ def start_scheduler():
         scheduler.add_job(job_func,'cron', hour=9,minute=30,timezone=timezone("Asia/Tokyo"),id="weather_morning", replace_existing=True)
         print("天気予報スケジューラースタート👻")
         # 雷通知
-        scheduler.add_job(job_weather,'cron',hour="9,14,19,",minute=0,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
+        scheduler.add_job(job_weather,'cron',hour="9,14,19",minute=0,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
         print("雷通知スケジューラースタート⚡")
         # 台風通知
-        scheduler.add_job(fetch_typhoon_alert,'cron',hour="9,10,14,19",minute=39,timezone=("Asia/Tokyo"),id="fetch_typhoon_alert",replace_existing=True)
+        scheduler.add_job(fetch_typhoon_alert,'cron',hour="9,10,14,19",minute=39,timezone=timezone("Asia/Tokyo"),id="fetch_typhoon_alert",replace_existing=True)
         print("台風スケジューラースタート🌀")
 
         scheduler.start()
