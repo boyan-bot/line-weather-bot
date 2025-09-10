@@ -264,8 +264,8 @@ def fetch_typhoon_alert():
             print("📢 台風通知:", msg)
             post_func(msg)
             break
-        else:
-            print("☀️ 台風の新しい発生情報はありませんでした")
+    else:
+        print("☀️ 台風の新しい発生情報はありませんでした")
 
 
 scheduler = BackgroundScheduler()
