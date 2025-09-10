@@ -274,13 +274,13 @@ def start_scheduler():
         print("🚀 Schedulerを開始します")
         # 天気予報
         scheduler.add_job(job_func,'cron', hour=20,minute=30,timezone=timezone("Asia/Tokyo"),id="weather_evning", replace_existing=True)
-        scheduler.add_job(job_func,'cron', hour=9,minute=32,timezone=timezone("Asia/Tokyo"),id="weather_morning", replace_existing=True)
+        scheduler.add_job(job_func,'cron', hour=9,minute=30,timezone=timezone("Asia/Tokyo"),id="weather_morning", replace_existing=True)
         print("天気予報スケジューラースタート👻")
         # 雷通知
         scheduler.add_job(job_weather,'cron',hour="9,14,19,",minute=0,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
         print("雷通知スケジューラースタート⚡")
         # 台風通知
-        scheduler.add_job(fetch_typhoon_alert,'cron',hour='9,10,14,19',minute=30,timezone=("Asia/Tokyo"),id='fetch_typhoon_alert',replace_existing=True)
+        scheduler.add_job(fetch_typhoon_alert,'cron',hour="9,10,14,19",minute=36,timezone=("Asia/Tokyo"),id="fetch_typhoon_alert",replace_existing=True)
         print("台風スケジューラースタート🌀")
 
         scheduler.start()
