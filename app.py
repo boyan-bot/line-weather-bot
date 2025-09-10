@@ -9,6 +9,7 @@ import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
 from post_linebot import post_func
 from pytz import timezone
+import re
 
 
 #グローバル変数の設定
@@ -230,6 +231,40 @@ def job_weather():
     else:
         msg = "☀️ 渋谷区に気象注意報はありません。"
         print(msg)
+    
+
+
+
+
+
+
+def fetch_typhoon_alert():
+    # ネームスペース辞書
+    NS = {
+    "atom": "http://www.w3.org/2005/Atom",
+    "sc": "http://www.w3.org/2005/Atom/ext#"
+        }
+    url = "https://www.data.jma.go.jp/developer/xml/feed/extra.xml"
+    try:
+        res = requests.get(url,timeout=10)
+        res.encoding = 'utf-8'
+        res.raise_for_status()
+    except Exception as e:
+        print(f'台風フィード取得失敗：\n{e}')
+        return
+
+    root = ET.fromstring(res.text)
+    for entry in root.findall('atom:entry',NS):
+        title = entry.find('atom:title,NS').text
+        link = entry.find('atom:link',NS).attrib['href']
+
+        if re.search(r"台風第\d+号に関する情報 第1号", title):
+            msg = f"🌀 台風発生！\n{title}\n詳細はこちら👉 {link}"
+            print("📢 台風通知:", msg)
+            post_func(msg)
+            break
+        else:
+            print("☀️ 台風の新しい発生情報はありませんでした")
 
 
 scheduler = BackgroundScheduler()
@@ -239,11 +274,15 @@ def start_scheduler():
         print("🚀 Schedulerを開始します")
         # 天気予報
         scheduler.add_job(job_func,'cron', hour=20,minute=30,timezone=timezone("Asia/Tokyo"),id="weather_evning", replace_existing=True)
-        scheduler.add_job(job_func,'cron', hour=9,minute=30,timezone=timezone("Asia/Tokyo"),id="weather_morning", replace_existing=True)
-        print("スケジューラースタート👻")
+        scheduler.add_job(job_func,'cron', hour=9,minute=32,timezone=timezone("Asia/Tokyo"),id="weather_morning", replace_existing=True)
+        print("天気予報スケジューラースタート👻")
         # 雷通知
-        scheduler.add_job(job_weather,'cron',hour="8-23",minute=0,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
-        
+        scheduler.add_job(job_weather,'cron',hour="9,14,19,",minute=0,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
+        print("雷通知スケジューラースタート⚡")
+        # 台風通知
+        scheduler.add_job(fetch_typhoon_alert,'cron',hour='9,10,14,19',minute=30,timezone=("Asia/Tokyo"),id='fetch_typhoon_alert',replace_existing=True)
+        print("台風スケジューラースタート🌀")
+
         scheduler.start()
         print("✅ Schedulerがスタートしました")
         for job in scheduler.get_jobs():
