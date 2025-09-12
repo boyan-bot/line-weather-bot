@@ -246,15 +246,27 @@ def fetch_typhoon_alert():
     "sc": "http://www.w3.org/2005/Atom/ext#"
         }
     url = "https://www.data.jma.go.jp/developer/xml/feed/extra.xml"
-    try:
-        res = requests.get(url,timeout=10)
-        res.encoding = 'utf-8'
-        res.raise_for_status()
-    except Exception as e:
-        print(f'台風フィード取得失敗：\n{e}')
-        return
 
-    root = ET.fromstring(res.text)
+    xml_str = """<?xml version="1.0" encoding="UTF-8"?>
+    <feed xmlns="http://www.w3.org/2005/Atom">
+    <entry>
+        <title>台風第9号に関する情報 第1号</title>
+        <link href="https://www.example.com/typhoon9"/>
+    </entry>
+    </feed>
+    """
+    root = ET.fromstring(xml_str)
+
+
+    # try:
+    #     res = requests.get(url,timeout=10)
+    #     res.encoding = 'utf-8'
+    #     res.raise_for_status()
+    # except Exception as e:
+    #     print(f'台風フィード取得失敗：\n{e}')
+    #     return
+
+    # root = ET.fromstring(res.text)
     for entry in root.findall('atom:entry',NS):
         title = entry.find('atom:title',NS).text
         link = entry.find('atom:link',NS).attrib['href']
@@ -281,7 +293,7 @@ def start_scheduler():
         scheduler.add_job(job_weather,'cron',hour="9,14,19",minute=0,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
         print("雷通知スケジューラースタート⚡")
         # 台風通知
-        scheduler.add_job(fetch_typhoon_alert,'cron',hour="9,10,14,19",minute=50,timezone=timezone("Asia/Tokyo"),id="fetch_typhoon_alert",replace_existing=True)
+        scheduler.add_job(fetch_typhoon_alert,'cron',hour="9,10,14,19",minute=5,timezone=timezone("Asia/Tokyo"),id="fetch_typhoon_alert",replace_existing=True)
         print("台風スケジューラースタート🌀")
 
         scheduler.start()
