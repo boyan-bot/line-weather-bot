@@ -247,29 +247,18 @@ def fetch_typhoon_alert():
         }
     url = "https://www.data.jma.go.jp/developer/xml/feed/extra.xml"
 
-    xml_str = """<?xml version="1.0" encoding="UTF-8"?>
-    <feed xmlns="http://www.w3.org/2005/Atom">
-    <entry>
-        <title>台風第9号に関する情報 第1号</title>
-        <link href="https://www.example.com/typhoon9"/>
-    </entry>
-    </feed>
-    """
-    root = ET.fromstring(xml_str)
+    try:
+        res = requests.get(url,timeout=10)
+        res.encoding = 'utf-8'
+        res.raise_for_status()
+    except Exception as e:
+        print(f'台風フィード取得失敗：\n{e}')
+        return
 
-
-    # try:
-    #     res = requests.get(url,timeout=10)
-    #     res.encoding = 'utf-8'
-    #     res.raise_for_status()
-    # except Exception as e:
-    #     print(f'台風フィード取得失敗：\n{e}')
-    #     return
-
-    # root = ET.fromstring(res.text)
+    root = ET.fromstring(res.text)
     for entry in root.findall('atom:entry',NS):
         title = entry.find('atom:title',NS).text
-        link = entry.find('atom:link',NS).attrib['href']
+        link = 'https://typhoon.yahoo.co.jp/weather/typhoon/'
 
         if re.search(r"台風第\d+号に関する情報 第1号", title):
             msg = f"🌀 台風発生！\n{title}\n詳細はこちら👉 {link}"
