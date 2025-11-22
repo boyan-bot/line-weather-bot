@@ -238,7 +238,7 @@ def job_weather():
 def is_no_typhoon():
 
     URL = 'https://typhoon.yahoo.co.jp/weather/typhoon/'
-    TARGET_TEXT = '発生していません'
+    TARGET_TEXT = 'どんぐり'
     
     try:
         response = requests.get(URL)
@@ -275,7 +275,7 @@ def start_scheduler():
         scheduler.add_job(job_weather,'cron',hour="9,14,19",minute=0,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
         print("雷通知スケジューラースタート⚡")
         # 台風通知
-        scheduler.add_job(is_no_typhoon,'cron',hour="9,10,14,15,19",minute=12,timezone=timezone("Asia/Tokyo"),id="is_no_typhoon",replace_existing=True)
+        scheduler.add_job(is_no_typhoon,'cron',hour="9,10,14,15,19",minute=25,timezone=timezone("Asia/Tokyo"),id="is_no_typhoon",replace_existing=True)
         print("台風スケジューラースタート🌀")
 
         scheduler.start()
