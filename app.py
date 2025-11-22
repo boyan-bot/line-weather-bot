@@ -5,12 +5,9 @@ from flask import request,Flask,render_template,redirect,url_for,flash
 from user_utils import add_user,init_db
 import sqlite3
 import datetime
-import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
 from post_linebot import post_func
 from pytz import timezone
-import re
-import xml.etree.ElementTree as ET
 
 
 #グローバル変数の設定
@@ -234,11 +231,11 @@ def job_weather():
         print(msg)
     
 
-#台風情報をパースしてTrueFalseで返す
+#台風情報
 def is_no_typhoon():
 
     URL = 'https://typhoon.yahoo.co.jp/weather/typhoon/'
-    TARGET_TEXT = 'どんぐり'
+    TARGET_TEXT = '発生していません'
     
     try:
         response = requests.get(URL)
@@ -251,7 +248,6 @@ def is_no_typhoon():
         if result:
             msg = '台風は発生していません'
             print(msg)
-            post_func(msg)
         else:
             msg =  '台風が発生しています🌀\n情報を確認してください👉\nhttps://typhoon.yahoo.co.jp/weather/typhoon/'
             print(msg)
@@ -275,7 +271,7 @@ def start_scheduler():
         scheduler.add_job(job_weather,'cron',hour="9,14,19",minute=0,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
         print("雷通知スケジューラースタート⚡")
         # 台風通知
-        scheduler.add_job(is_no_typhoon,'cron',hour="9,10,14,15,19",minute=25,timezone=timezone("Asia/Tokyo"),id="is_no_typhoon",replace_existing=True)
+        scheduler.add_job(is_no_typhoon,'cron',hour="10,19",minute=0,timezone=timezone("Asia/Tokyo"),id="is_no_typhoon",replace_existing=True)
         print("台風スケジューラースタート🌀")
 
         scheduler.start()
