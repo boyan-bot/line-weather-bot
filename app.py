@@ -238,7 +238,7 @@ def is_no_typhoon():
     TARGET_TEXT = '発生していません'
     
     try:
-        response = requests.get(URL)
+        response = requests.get(URL,timeout=10)
         response.raise_for_status()
         HTML = response.text
         
