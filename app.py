@@ -234,39 +234,32 @@ def job_weather():
         print(msg)
     
 
+#台風情報をパースしてTrueFalseで返す
+def is_no_typhoon():
 
-
-
-
-
-def fetch_typhoon_alert():
-    # ネームスペース辞書
-    NS = {
-    "atom": "http://www.w3.org/2005/Atom",
-    "sc": "http://www.w3.org/2005/Atom/ext#"
-        }
-    url = "https://www.data.jma.go.jp/developer/xml/feed/extra.xml"
-
+    URL = 'https://typhoon.yahoo.co.jp/weather/typhoon/'
+    TARGET_TEXT = '発生していません'
+    
     try:
-        res = requests.get(url,timeout=10)
-        res.encoding = 'utf-8'
-        res.raise_for_status()
+        response = requests.get(URL)
+        response.raise_for_status()
+        HTML = response.text
+        
+        result = TARGET_TEXT in HTML
+
+     # --- 出力 ---
+        if result:
+            msg = '台風は発生していません'
+            print(msg)
+            post_func(msg)
+        else:
+            msg =  '台風が発生しています🌀\n情報を確認してください👉\nhttps://typhoon.yahoo.co.jp/weather/typhoon/'
+            print(msg)
+            post_func(msg)
     except Exception as e:
-        print(f'台風フィード取得失敗：\n{e}')
+        print(f'パース処理に失敗しました：\n{e}')
         return
 
-    root = ET.fromstring(res.text)
-    for entry in root.findall('atom:entry',NS):
-        title = entry.find('atom:title',NS).text
-        link = 'https://typhoon.yahoo.co.jp/weather/typhoon/'
-
-        if re.search(r"台風第\d+号に関する情報 第1号", title):
-            msg = f"🌀 台風発生！\n{title}\n詳細はこちら👉 {link}"
-            print("📢 台風通知:", msg)
-            post_func(msg)
-            break
-    else:
-        print("☀️ 台風の新しい発生情報はありませんでした")
 
 
 scheduler = BackgroundScheduler()
@@ -282,7 +275,7 @@ def start_scheduler():
         scheduler.add_job(job_weather,'cron',hour="9,14,19",minute=0,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
         print("雷通知スケジューラースタート⚡")
         # 台風通知
-        scheduler.add_job(fetch_typhoon_alert,'cron',hour="9,10,14,19",minute=5,timezone=timezone("Asia/Tokyo"),id="fetch_typhoon_alert",replace_existing=True)
+        scheduler.add_job(is_no_typhoon,'cron',hour="9,10,14,19",minute=5,timezone=timezone("Asia/Tokyo"),id="is_no_typhoon",replace_existing=True)
         print("台風スケジューラースタート🌀")
 
         scheduler.start()
