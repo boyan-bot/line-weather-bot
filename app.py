@@ -290,7 +290,7 @@ def start_scheduler():
         scheduler.add_job(job_weather,'cron',hour="9,14,19",minute=0,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
         print("雷通知スケジューラースタート⚡")
         # 台風通知
-        scheduler.add_job(is_no_typhoon,'cron',hour="10,17",minute=0,timezone=timezone("Asia/Tokyo"),id="is_no_typhoon",replace_existing=True)
+        scheduler.add_job(is_no_typhoon,'cron',hour="10,17",minute=5,timezone=timezone("Asia/Tokyo"),id="is_no_typhoon",replace_existing=True)
         print("台風スケジューラースタート🌀")
 
         scheduler.start()
