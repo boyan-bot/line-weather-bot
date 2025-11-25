@@ -261,11 +261,15 @@ def is_no_typhoon():
             msg = '台風は発生していません'
             print(msg)
         else:
-            summary = soup.find('d',class_="typhoonCondition_contents").text
+            summary = soup.find('div',class_="typhoonCondition_contents")
             if not summary:
                 msg = f'台風が発生しています🌀\n情報を確認してください👉\nhttps://typhoon.yahoo.co.jp/weather/typhoon/'
             else:
-                msg = f'台風が発生しています🌀\n{summary}\n情報を確認してください👉\nhttps://typhoon.yahoo.co.jp/weather/typhoon/'
+                summary_text = summary.text
+                if not summary_text:
+                    msg = f'台風が発生しています🌀\n情報を確認してください👉\nhttps://typhoon.yahoo.co.jp/weather/typhoon/'
+                else:
+                    msg = f'台風が発生しています🌀\n{summary}\n情報を確認してください👉\nhttps://typhoon.yahoo.co.jp/weather/typhoon/'
             print(msg)
             post_func(msg)
         
