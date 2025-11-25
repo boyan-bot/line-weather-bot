@@ -8,6 +8,7 @@ import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from post_linebot import post_func
 from pytz import timezone
+from bs4 import BeautifulSoup
 
 
 #グローバル変数の設定
@@ -241,22 +242,40 @@ def is_no_typhoon():
         response = requests.get(URL,timeout=10)
         response.raise_for_status()
         HTML = response.text
-        
-        result = TARGET_TEXT in HTML
 
-     # --- 出力 ---
-        if result:
+        soup = BeautifulSoup(HTML,"html.parser")
+        section = soup.find('div',class_="yjw_main_md target_modules")
+        if not section:
+            msg = 'class_="yjw_main_md target_modulesを持ったdivタブは見つかりませんでした'
+            print(msg)
+            return
+        p_tab = section.find('p').text
+
+        if not p_tab:
+            msg = 'pタブは見つかりませんでした'
+            print(msg)
+            return  
+        
+        # --- 出力 ---
+        if TARGET_TEXT in p_tab:
             msg = '台風は発生していません'
             print(msg)
         else:
-            msg =  '台風が発生しています🌀\n情報を確認してください👉\nhttps://typhoon.yahoo.co.jp/weather/typhoon/'
+            summary = soup.find('d',class_="typhoonCondition_contents").text
+            if not summary:
+                msg = f'台風が発生しています🌀\n情報を確認してください👉\nhttps://typhoon.yahoo.co.jp/weather/typhoon/'
+            else:
+                msg = f'台風が発生しています🌀\n{summary}\n情報を確認してください👉\nhttps://typhoon.yahoo.co.jp/weather/typhoon/'
             print(msg)
             post_func(msg)
+        
     except Exception as e:
         print(f'パース処理に失敗しました：\n{e}')
         return
 
 
+
+#スケジューラー
 
 scheduler = BackgroundScheduler()
 def start_scheduler():
@@ -271,7 +290,7 @@ def start_scheduler():
         scheduler.add_job(job_weather,'cron',hour="9,14,19",minute=0,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
         print("雷通知スケジューラースタート⚡")
         # 台風通知
-        scheduler.add_job(is_no_typhoon,'cron',hour="10,19",minute=0,timezone=timezone("Asia/Tokyo"),id="is_no_typhoon",replace_existing=True)
+        scheduler.add_job(is_no_typhoon,'cron',hour="10,17",minute=0,timezone=timezone("Asia/Tokyo"),id="is_no_typhoon",replace_existing=True)
         print("台風スケジューラースタート🌀")
 
         scheduler.start()
@@ -287,3 +306,4 @@ if __name__ == '__main__':
     app.run(port=5000)
 
 
+#台風通知はyahoo天気のhtmlを持ってきた
