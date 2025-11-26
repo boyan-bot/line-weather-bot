@@ -242,20 +242,11 @@ def is_no_typhoon():
         response = requests.get(URL,timeout=10)
         response.raise_for_status()
         HTML = response.text
-
         soup = BeautifulSoup(HTML,"html.parser")
         
-        # 台風が発生しているかチェック
-        section = soup.find('div',class_="yjw_main_md target_modules")
-        #　台風未発生
-        if section:
-            sub_section = section.find('p')
-            if sub_section:
-                result = sub_section.text
-                if TARGET_TEXT in result:
-                    msg = '台風は発生していません'
-                    print(msg)
-        #　台風発生
+        if TARGET_TEXT in HTML:
+            msg = msg = '台風は発生していません'
+            print(msg)
         else:
             summary =soup.find('div',class_="typhoonCondition_contents")
             if not summary:
@@ -264,8 +255,7 @@ def is_no_typhoon():
                 summary_text = summary.text
                 msg = msg = f'台風が発生しています🌀\n📝{summary_text}\n\n情報を確認してください👉\nhttps://typhoon.yahoo.co.jp/weather/typhoon/'
             print(msg)
-            post_func(msg)
-
+            post_func(msg) 
 
     except Exception as e:
         print(f'パース処理に失敗しました：\n{e}')
@@ -288,7 +278,7 @@ def start_scheduler():
         scheduler.add_job(job_weather,'cron',hour="9,14,19",minute=0,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
         print("雷通知スケジューラースタート⚡")
         # 台風通知
-        scheduler.add_job(is_no_typhoon,'cron',hour="10,23",minute=50,timezone=timezone("Asia/Tokyo"),id="is_no_typhoon",replace_existing=True)
+        scheduler.add_job(is_no_typhoon,'cron',hour="10,11",minute=7,timezone=timezone("Asia/Tokyo"),id="is_no_typhoon",replace_existing=True)
         print("台風スケジューラースタート🌀")
 
         scheduler.start()
