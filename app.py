@@ -252,8 +252,8 @@ def is_no_typhoon():
             if not summary:
                 msg = f'台風が発生しています🌀\n情報を確認してください👉\nhttps://typhoon.yahoo.co.jp/weather/typhoon/'
             else:
-                summary_text = summary.text
-                msg = msg = f'台風が発生しています🌀\n📝{summary_text}\n\n情報を確認してください👉\nhttps://typhoon.yahoo.co.jp/weather/typhoon/'
+                summary_text = summary.get_text(separator="", strip=True)
+                msg = msg = f'台風が発生しています🌀\n📝{summary_text}\n情報を確認してください👉\nhttps://typhoon.yahoo.co.jp/weather/typhoon/'
             print(msg)
             post_func(msg) 
 
@@ -278,7 +278,7 @@ def start_scheduler():
         scheduler.add_job(job_weather,'cron',hour="9,14,19",minute=0,timezone=timezone("Asia/Tokyo"),id="thunder_alert", replace_existing=True)
         print("雷通知スケジューラースタート⚡")
         # 台風通知
-        scheduler.add_job(is_no_typhoon,'cron',hour="10,11",minute=7,timezone=timezone("Asia/Tokyo"),id="is_no_typhoon",replace_existing=True)
+        scheduler.add_job(is_no_typhoon,'cron',hour="10,11",minute=30,timezone=timezone("Asia/Tokyo"),id="is_no_typhoon",replace_existing=True)
         print("台風スケジューラースタート🌀")
 
         scheduler.start()
